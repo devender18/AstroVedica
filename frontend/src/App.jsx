@@ -1,21 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
-import DiamondChart from "./components/DiamondChart";
 import NorthIndianChart from './components/NorthIndianChart'; 
 
 const ZODIAC_SIGNS = [
-  "Aries",
-  "Taurus",
-  "Gemini",
-  "Cancer",
-  "Leo",
-  "Virgo",
-  "Libra",
-  "Scorpio",
-  "Sagittarius",
-  "Capricorn",
-  "Aquarius",
-  "Pisces",
+  "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
 ];
 
 export default function KundliApp() {
@@ -28,6 +17,8 @@ export default function KundliApp() {
     longitude: "",
   });
   const [kundliData, setKundliData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({
@@ -38,6 +29,9 @@ export default function KundliApp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+    
     try {
       const res = await axios.post("http://127.0.0.1:5050/api/kundli", {
         ...formData,
@@ -47,99 +41,167 @@ export default function KundliApp() {
       setKundliData(res.data);
     } catch (err) {
       console.error("Error fetching kundli:", err);
+      setError("Failed to generate Kundli. Please check your inputs and try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderChart = (chart) => {
-    // chart is an object: { sign: [planets] }
-    const chartArr = ZODIAC_SIGNS.map((sign) => chart[sign]?.join(", ") || "");
-    const grid = [
-      [chartArr[6], chartArr[7], chartArr[8]],
-      [chartArr[5], "", chartArr[9]],
-      [chartArr[4], chartArr[3], chartArr[10]],
-      [chartArr[2], chartArr[1], chartArr[11]],
-      [chartArr[0], "", "Asc"],
-    ];
-
-    return (
-      <div className="grid grid-cols-3 gap-2 border p-4 shadow rounded-xl w-[360px] bg-white">
-        {grid.flat().map((val, idx) => (
-          <div
-            key={idx}
-            className="h-20 flex items-center justify-center text-center border rounded bg-yellow-50 text-sm font-semibold"
-          >
-            {val || ""}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-b from-yellow-100 to-white flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-6">Kundli Generator</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-2 gap-4 max-w-xl mb-10 bg-white p-6 shadow-xl rounded-xl"
-      >
-        <input
-          className="border p-2 rounded"
-          placeholder="Name"
-          name="name"
-          onChange={handleChange}
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Date of Birth (YYYY-MM-DD)"
-          name="date_of_birth"
-          onChange={handleChange}
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Time of Birth (HH:MM)"
-          name="time_of_birth"
-          onChange={handleChange}
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Latitude (e.g. 28.61)"
-          name="latitude"
-          onChange={handleChange}
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Longitude (e.g. 77.20)"
-          name="longitude"
-          onChange={handleChange}
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Timezone (e.g. Asia/Kolkata)"
-          name="timezone"
-          onChange={handleChange}
-        />
-        <button
-          type="submit"
-          className="col-span-2 bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
-        >
-          Generate Kundli
-        </button>
-      </form>
-
-      {kundliData && (
-        <div className="flex flex-col md:flex-row gap-8 items-center">
-          <NorthIndianChart
-            chart={kundliData.d1_chart}
-            ascendant={ZODIAC_SIGNS.indexOf(kundliData.ascendant)}
-            title="Lagna Chart"
-          />
-          <NorthIndianChart
-            chart={kundliData.d9_chart}
-            ascendant={ZODIAC_SIGNS.indexOf(kundliData.ascendant)}
-            title="Navamsa Chart"
-          />
+    <div className="min-h-screen p-6 bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
+          🌟 Vedic Astrology Kundli Generator 🌟
+        </h1>
+        
+        <div className="bg-white rounded-xl shadow-2xl p-6 mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Birth Details</h2>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                placeholder="Enter your full name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date of Birth
+              </label>
+              <input
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                type="date"
+                name="date_of_birth"
+                value={formData.date_of_birth}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Time of Birth
+              </label>
+              <input
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                type="time"
+                name="time_of_birth"
+                value={formData.time_of_birth}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Timezone
+              </label>
+              <select
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                name="timezone"
+                value={formData.timezone}
+                onChange={handleChange}
+              >
+                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                <option value="America/New_York">America/New_York (EST)</option>
+                <option value="Europe/London">Europe/London (GMT)</option>
+                <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Latitude
+              </label>
+              <input
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                placeholder="e.g., 28.6139 (Delhi)"
+                name="latitude"
+                value={formData.latitude}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Longitude
+              </label>
+              <input
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                placeholder="e.g., 77.2090 (Delhi)"
+                name="longitude"
+                value={formData.longitude}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-3 rounded-lg font-semibold text-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 disabled:opacity-50"
+              >
+                {loading ? "Generating Kundli..." : "🔮 Generate Kundli"}
+              </button>
+            </div>
+          </form>
+          
+          {error && (
+            <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
         </div>
-      )}
+
+        {kundliData && (
+          <div className="bg-white rounded-xl shadow-2xl p-6">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                {kundliData.name}'s Kundli
+              </h2>
+              <p className="text-gray-600">
+                Ascendant: <span className="font-semibold text-yellow-600">{kundliData.ascendant}</span>
+              </p>
+              {kundliData.birth_info && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Born on {kundliData.birth_info.date} at {kundliData.birth_info.time} ({kundliData.birth_info.timezone})
+                </p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 justify-items-center">
+              <NorthIndianChart
+                chart={kundliData.d1_chart}
+                ascendant={kundliData.ascendant}
+                title="Lagna Chart (D1)"
+              />
+              <NorthIndianChart
+                chart={kundliData.d9_chart}
+                ascendant={kundliData.ascendant}
+                title="Navamsa Chart (D9)"
+              />
+            </div>
+            
+            <div className="mt-8 p-4 bg-yellow-50 rounded-lg">
+              <h3 className="font-semibold text-lg mb-2 text-yellow-800">Chart Information</h3>
+              <p className="text-sm text-yellow-700">
+                <strong>Lagna Chart (D1):</strong> Shows the main life themes, personality, and general life path.<br/>
+                <strong>Navamsa Chart (D9):</strong> Shows marriage compatibility, spiritual path, and inner strength.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
