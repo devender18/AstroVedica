@@ -75,7 +75,7 @@ const NorthIndianChart = ({ chart, ascendant, title }) => {
 
   return (
     <div className="flex flex-col items-center p-4">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">{title}</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-400">{title}</h2>
       <div className="relative">
         <svg viewBox="0 0 400 360" width="400" height="360" className="border-2 border-gray-600 bg-gradient-to-br from-yellow-50 to-orange-50">
           {/* Main diamond outline */}
