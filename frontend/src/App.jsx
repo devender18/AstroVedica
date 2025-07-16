@@ -33,7 +33,7 @@ export default function App() {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("https://16.171.12.151:5050/api/kundli", {
+      const res = await axios.post("https://16.171.230.135:5050/api/kundli", {
         ...formData,
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
